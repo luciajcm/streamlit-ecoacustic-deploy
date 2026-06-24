@@ -13,7 +13,7 @@ Este proyecto se enfoca en la **clasificación de especies silvestres** utilizan
 
 ---
 
-## 📁 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 Proyecto_2/
@@ -57,7 +57,7 @@ Proyecto_2/
 
 ---
 
-## 🔧 Configuración y Instalación
+## Configuración y Instalación
 
 ### Requisitos
 - Python 3.x
@@ -89,7 +89,7 @@ Proyecto_2/
 
 ---
 
-## 🔄 Flujo de Procesamiento
+## Flujo de Procesamiento
 
 ### 1. **Carga de Datos**
 - Se cargan dos archivos CSV principales:
@@ -142,7 +142,7 @@ Se exploran dos métodos:
 
 ---
 
-## 📊 Archivos Generados
+## Archivos Generados
 
 ### Datos Procesados (`data/processed/`)
 
@@ -183,7 +183,7 @@ Se exploran dos métodos:
 
 ---
 
-## 🚀 Cómo Ejecutar
+## Cómo Ejecutar
 
 ### Ejecutar el Notebook Completo
 
@@ -218,7 +218,7 @@ El notebook ejecutará secuencialmente:
 
 ---
 
-## 📈 Próximos Pasos
+## Próximos Pasos
 
 Este proyecto continuará con:
 - [ ] Desarrollo de modelos de clasificación (SVM, Random Forest, XGBoost, etc.)
@@ -231,13 +231,13 @@ Este proyecto continuará con:
 
 ---
 
-## 👤 Integrantes
+## Integrantes
 
-- **Integrante 1**: Preprocesamiento y Análisis de Dimensionalidad (PCA, UMAP)
+- **Marco Apolinario**: Preprocesamiento y Análisis de Dimensionalidad (PCA, UMAP)
 
 ---
 
-## 📝 Notas Importantes
+## Notas Importantes
 
 - El `RANDOM_STATE = 42` se utiliza para reproducibilidad
 - El escalador se ajusta **solo en X_dev** para evitar data leakage
@@ -247,7 +247,7 @@ Este proyecto continuará con:
 
 ---
 
-## 📚 Referencias
+## Referencias
 
 - Documentación del dataset: Ver `Documentacion_de_dataset.pdf`
 - Scikit-learn: https://scikit-learn.org/
