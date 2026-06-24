@@ -1,6 +1,6 @@
 # Proyecto 2: Clasificación de Especies usando Ecoacústica
 
-## 📋 Descripción General
+## Descripción General
 
 Este proyecto se enfoca en la **clasificación de especies silvestres** utilizando características de ecoacústica (análisis de grabaciones de sonido). El objetivo es predecir qué especie produce un determinado sonido basándose en características mel-espectrograma y metadatos de audio.
 
@@ -257,4 +257,4 @@ Este proyecto continuará con:
 ---
 
 **Última actualización:** 2026-06-24  
-**Estado del proyecto:** En construcción 🔨
+**Estado del proyecto:** En construcción
