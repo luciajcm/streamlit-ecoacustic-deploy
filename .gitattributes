@@ -1,0 +1,17 @@
+# Normaliza fines de linea: evita diffs fantasma por CRLF vs LF entre Windows/Mac/Linux
+* text=auto eol=lf
+
+# Notebooks y texto: siempre LF en el repo
+*.ipynb text eol=lf
+*.py    text eol=lf
+*.tex   text eol=lf
+*.md    text eol=lf
+*.csv   text eol=lf
+*.txt   text eol=lf
+
+# Binarios: nunca convertir
+*.png   binary
+*.jpg   binary
+*.pdf   binary
+*.pkl   binary
+*.pt    binary
