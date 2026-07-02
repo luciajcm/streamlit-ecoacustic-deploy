@@ -5,6 +5,9 @@ __pycache__/
 .venv/
 venv/
 
+# Carpeta de figuras duplicada del Integrante 2 (las oficiales estan en report/figs y outputs/figures)
+figs/
+
 # Si no quieres subir los CSV originales:
 # eco_acoustic_train.csv
 # eco_acoustic_test.csv

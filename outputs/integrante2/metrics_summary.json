@@ -1,0 +1,32 @@
+{
+  "reduccion_dim": {
+    "tiempo_s": {
+      "PCA": 0.01,
+      "t-SNE": 13.69,
+      "UMAP": 25.25
+    },
+    "trustworthiness": {
+      "PCA": 0.866,
+      "t-SNE": 0.987,
+      "UMAP": 0.977
+    },
+    "tipo": {
+      "PCA": "lineal (var. global)",
+      "t-SNE": "variedad (local)",
+      "UMAP": "variedad (local)"
+    }
+  },
+  "clustering": {
+    "gmm_k": 2,
+    "gmm_silhouette": 0.1820145845413208,
+    "gmm_ari": 0.02588706684854139
+  },
+  "clasificacion": {
+    "mlp_f1_macro": 0.463886059261365,
+    "xgboost_f1_macro": 0.45292852242240655
+  },
+  "mitigacion": {
+    "cobertura_confianza_pct": 3.9832285115303985,
+    "accuracy_confianza": 0.7894736842105263
+  }
+}

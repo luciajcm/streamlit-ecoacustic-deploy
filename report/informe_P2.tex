@@ -150,9 +150,9 @@ El Cuadro~\ref{tab:dr} reporta el compromiso entre costo computacional y retenci
 de estructura. PCA result\'o el m\'etodo m\'as eficiente ($0{,}01$\,s) por su naturaleza
 algebraica, pero su \textit{trustworthiness} fue la menor, coherente con su
 incapacidad de capturar relaciones no lineales. t-SNE y UMAP incrementaron el
-tiempo de c\'omputo a $11{,}9$\,s y $11{,}3$\,s respectivamente, a cambio de una mayor
+tiempo de c\'omputo a $13{,}7$\,s y $25{,}3$\,s respectivamente, a cambio de una mayor
 preservaci\'on de la estructura local (\textit{trustworthiness} de $0{,}987$ y $0{,}977$,
-frente a $0{,}867$ de PCA). En
+frente a $0{,}866$ de PCA). En
 consecuencia, las t\'ecnicas de variedades resultan preferibles para la
 \textbf{visualizaci\'on} y la inspecci\'on de separabilidad, mientras que PCA se
 reserva como paso de \textbf{compresi\'on} previo al clustering por su bajo costo y
@@ -169,9 +169,9 @@ $k=10$).}
 \toprule
 M\'etodo & Tiempo (s) & \textit{Trustworthiness} & Tipo \\
 \midrule
-PCA   & $0{,}01$  & $0{,}867$ & Lineal (varianza global) \\
-t-SNE & $11{,}91$ & $0{,}987$ & Variedad (estructura local) \\
-UMAP  & $11{,}26$ & $0{,}977$ & Variedad (estructura local) \\
+PCA   & $0{,}01$  & $0{,}866$ & Lineal (varianza global) \\
+t-SNE & $13{,}69$ & $0{,}987$ & Variedad (estructura local) \\
+UMAP  & $25{,}25$ & $0{,}977$ & Variedad (estructura local) \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -204,7 +204,7 @@ La elecci\'on del n\'umero \'optimo de grupos se sustent\'o exclusivamente en
 \textbf{m\'etricas internas} (que no emplean las etiquetas reales): el
 \textbf{Coeficiente de Silhouette}, el \'indice de \textbf{Davies-Bouldin} y el de
 \textbf{Calinski-Harabasz} (Figura~\ref{fig:metricas}). El criterio de Silhouette
-sugiri\'o $k=2$ grupos para GMM ($s=0{,}184$), valor corroborado por las restantes
+sugiri\'o $k=2$ grupos para GMM ($s=0{,}182$), valor corroborado por las restantes
 m\'etricas internas (m\'inimo de Davies-Bouldin y m\'aximo de Calinski-Harabasz en $k=2$)
 y por el criterio BIC (Figura~\ref{fig:gmmsel}). El Cuadro~
 \ref{tab:clust} sintetiza el desempe\~no; adicionalmente, el \'indice de Rand
@@ -244,14 +244,14 @@ referencia externa de alineaci\'on con \texttt{species\_id}.}
 \toprule
 M\'etodo & Paradigma & Grupos & Silhouette & ARI \\
 \midrule
-GMM    & Probabil\'istico & 2 & $0{,}184$ & $0{,}026$ \\
-DBSCAN & Densidad        & 2 & --       & $0{,}004$ \\
+GMM    & Probabil\'istico & 2 & $0{,}182$ & $0{,}026$ \\
+DBSCAN & Densidad        & 2 & --       & $0{,}003$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 Los valores de Silhouette pr\'oximos a cero y los \'indices ARI cercanos a $0$
-($0{,}026$ para GMM y $0{,}004$ para DBSCAN) constituyen un hallazgo relevante: la
+($0{,}026$ para GMM y $0{,}003$ para DBSCAN) constituyen un hallazgo relevante: la
 estructura no supervisada del espacio Mel \textbf{no se organiza en cinco grupos
 densos separables} que coincidan con la taxonom\'ia. Ambos algoritmos favorecen
 $k=2$, lo que sugiere una separaci\'on macrosc\'opica (posiblemente se\~nal robusta
@@ -332,19 +332,19 @@ El MLP se compar\'o contra \textbf{XGBoost}, un modelo de ensamble basado en
 sobre el \textbf{F1-Score macro} y el an\'alisis de las \textbf{matrices de
 confusi\'on} (Figura~\ref{fig:cm}), dada la inadecuaci\'on de la m\'etrica
 \textit{accuracy} ante el desbalance de clases. El MLP alcanz\'o un F1-macro de
-$0{,}453$, mientras que XGBoost obtuvo $0{,}466$, situando a ambos modelos
+$0{,}464$, mientras que XGBoost obtuvo $0{,}453$, situando a ambos modelos
 sensiblemente por encima del azar te\'orico ($\approx 0{,}20$ para cinco clases) pero
 en un r\'egimen de dificultad elevada, coherente con el solapamiento detectado en la
-fase no supervisada. El modelo de ensamble super\'o marginalmente a la red neuronal.
-Un an\'alisis desagregado por clase (Cuadro~\ref{tab:recall}) matiza esta lectura.
-El XGBoost concentra su acierto en las clases mayoritarias --recall de $0{,}66$ en la
-clase 23 y $0{,}54$ en la 17--, a costa de penalizar severamente a las minoritarias
-(recall de $0{,}34$ en la clase 12). El MLP, gracias a la ponderaci\'on de la
-p\'erdida, distribuye el acierto de forma m\'as equitativa entre clases (recall de
-$0{,}61$ en la clase 10 y $0{,}55$ en la 18), lo que explica que su F1-macro no se
-distancie del ensamble pese a su menor \textit{accuracy} global. El error dominante no
+fase no supervisada. La red neuronal super\'o marginalmente al modelo de ensamble.
+Un an\'alisis desagregado por clase (Cuadro~\ref{tab:recall}) explica esta ventaja.
+El XGBoost concentra su acierto en las clases mayoritarias --recall de $0{,}64$ en la
+clase 23 y $0{,}58$ en la 17--, a costa de penalizar severamente a las minoritarias
+(recall de apenas $0{,}30$ en la clase 18). El MLP, gracias a la ponderaci\'on de la
+p\'erdida, distribuye el acierto de forma m\'as equitativa entre clases (recall entre
+$0{,}38$ y $0{,}58$, sin ninguna clase abandonada), lo que eleva su F1-macro por encima
+del ensamble pese a una \textit{accuracy} global similar. El error dominante no
 se limita a las tres aves: la mayor masa de confusi\'on se produce entre las clases 23
-(ave) y 10 (anfibio) en ambos modelos ($44$ casos $23\!\to\!10$ en el MLP y $29$ casos
+(ave) y 10 (anfibio) en ambos modelos ($47$ casos $23\!\to\!10$ en el MLP y $30$ casos
 $10\!\to\!23$ en XGBoost), lo que sugiere que el solapamiento en el espacio Mel
 trasciende la frontera taxonom\'ica y refuerza la dificultad intr\'inseca anticipada por
 el an\'alisis no supervisado.
@@ -360,8 +360,8 @@ mayoritarias.}
 \toprule
 Modelo & Clase 10 & Clase 12 & Clase 17 & Clase 18 & Clase 23 \\
 \midrule
-MLP     & $0{,}61$ & $0{,}51$ & $0{,}41$ & $0{,}55$ & $0{,}33$ \\
-XGBoost & $0{,}39$ & $0{,}34$ & $0{,}54$ & $0{,}36$ & $0{,}66$ \\
+MLP     & $0{,}58$ & $0{,}53$ & $0{,}40$ & $0{,}57$ & $0{,}38$ \\
+XGBoost & $0{,}36$ & $0{,}36$ & $0{,}58$ & $0{,}30$ & $0{,}64$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -381,12 +381,13 @@ XGBoost (derecha).}
 \subsection{An\'alisis de \textit{trade-offs}}
 La selecci\'on del modelo de despliegue contempla el compromiso entre rendimiento
 anal\'itico y costo computacional. El Cuadro~\ref{tab:tradeoff} contrasta el
-F1-macro frente al tiempo de inferencia por registro. Si bien XGBoost
-ofrece el mejor F1-macro ($0{,}466$), su tiempo de inferencia de $0{,}830$\,ms por
-registro es aproximadamente $3{,}6$ veces superior al del MLP ($0{,}229$\,ms), lo que
-debe ponderarse frente al volumen de registros esperado en producci\'on. Dada la
-diferencia marginal en rendimiento, el MLP constituye una alternativa competitiva
-cuando la latencia es cr\'itica.
+F1-macro frente al tiempo de inferencia por registro. En este caso el MLP resulta
+doblemente preferible: ofrece el mejor F1-macro ($0{,}464$ frente a $0{,}453$) y, a la
+vez, el menor tiempo de inferencia ($0{,}693$\,ms por registro, frente a los
+$2{,}420$\,ms de XGBoost, unas $3{,}5$ veces m\'as lento). El costo del ensamble se
+concentra adem\'as en su fase de entrenamiento. En consecuencia, para el volumen de
+registros esperado en un despliegue de monitoreo continuo, el MLP domina el
+compromiso rendimiento--latencia y se adopta como modelo de producci\'on.
 
 \begin{table}[H]
 \centering
@@ -398,8 +399,8 @@ registro).}
 \toprule
 Modelo & F1-macro & Inferencia (ms/registro) \\
 \midrule
-MLP     & $0{,}453$ & $0{,}229$ \\
-XGBoost & $0{,}466$ & $0{,}830$ \\
+MLP     & $0{,}464$ & $0{,}693$ \\
+XGBoost & $0{,}453$ & $2{,}420$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -410,24 +411,23 @@ salida del modelo \'optimo, que define tres estados seg\'un la probabilidad
 predictiva m\'axima $P = \max_k \hat{p}_k$:
 \begin{itemize}[noitemsep,topsep=2pt]
   \item \textbf{Zona de Confianza} ($P \geq 0.85$): clasificaci\'on autom\'atica
-  (alerta verde). Cubri\'o el $19{,}9$\,\% de los registros de prueba (95 de 477),
-  con una exactitud de $0{,}589$ en dicha zona.
+  (alerta verde). Cubri\'o el $4{,}0$\,\% de los registros de prueba (19 de 477),
+  con una exactitud de $0{,}789$ en dicha zona.
   \item \textbf{Zona de Incertidumbre} ($0.40 \leq P < 0.85$): clasificaci\'on
   asistida; el registro se deriva a una cola de auditor\'ia humana (alerta amarilla).
   \item \textbf{Zona de Rechazo} ($P < 0.40$): descarte autom\'atico para mitigar el
   impacto del ruido ambiental (alerta roja).
 \end{itemize}
 La Figura~\ref{fig:zonas} muestra la distribuci\'on de la confianza del modelo y la
-ubicaci\'on de los umbrales. Esta pol\'itica permite derivar la incertidumbre a
-revisi\'on experta y controlar los falsos positivos. Cabe se\~nalar, sin embargo, una
-limitaci\'on cr\'itica: la exactitud en la Zona de Confianza ($0{,}589$) es solo
-moderadamente superior a la \textit{accuracy} global del modelo, lo que indica que una
-probabilidad m\'axima $P\geq 0{,}85$ \textbf{no garantiza} una alta tasa de acierto. Ello
-revela un modelo \textbf{insuficientemente calibrado}: las probabilidades de salida
-sobreestiman la confianza real. En un despliegue productivo ser\'ia recomendable, o bien
-elevar el umbral de automatizaci\'on, o bien aplicar una calibraci\'on posterior (p.\,ej.
-\textit{temperature scaling} o regresi\'on isot\'onica) antes de confiar en la
-clasificaci\'on autom\'atica. Dada la criticidad ecol\'ogica de un falso positivo, la
+ubicaci\'on de los umbrales. La pol\'itica exhibe un \textbf{compromiso claro entre
+cobertura y fiabilidad}: la Zona de Confianza automatiza solo el $4{,}0$\,\% de los
+registros, pero en esa fracci\'on la exactitud asciende a $0{,}789$, muy por encima de
+la \textit{accuracy} global ($\approx 0{,}46$). Es decir, el umbral $P\geq 0{,}85$
+act\'ua como un filtro de alta precisi\'on: sacrifica volumen de automatizaci\'on a
+cambio de fiabilidad en lo que efectivamente automatiza. El grueso de las detecciones
+($74{,}8$\,\% en la Zona de Incertidumbre) se deriva a auditor\'ia humana y un
+$21{,}2$\,\% se descarta como ruido. Dada la criticidad ecol\'ogica de un falso
+positivo, la
 pol\'itica conservadora actual --que env\'ia el $75{,}7\,\%$ de los registros a auditoria--
 resulta prudente.
 
