@@ -1,0 +1,18 @@
+{
+    "best_mlp_name": "MLP + Dropout \u2192 BatchNorm",
+    "best_ensemble_name": "XGBoost",
+    "species_names": {
+        "0": "Leptodactylus discodactylus",
+        "1": "Osteocephalus taurinus",
+        "2": "Chiroxiphia lineata",
+        "3": "Saltator grossus",
+        "4": "Pheucticus chrysopeplus"
+    },
+    "thresholds": {
+        "confianza": 0.85,
+        "incertidumbre_min": 0.4,
+        "rechazo_max": 0.4
+    },
+    "input_dim": 64,
+    "n_classes": 5
+}
