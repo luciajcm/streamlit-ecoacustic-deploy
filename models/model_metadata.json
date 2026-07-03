@@ -1,5 +1,5 @@
 {
-    "best_mlp_name": "MLP + Dropout \u2192 BatchNorm",
+    "best_mlp_name": "MLP + Dropout (post-activaci\u00f3n)",
     "best_ensemble_name": "XGBoost",
     "species_names": {
         "0": "Leptodactylus discodactylus",

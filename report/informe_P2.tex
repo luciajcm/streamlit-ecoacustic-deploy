@@ -17,12 +17,13 @@
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{4pt}
 
-% Caption mas compacto y en negrita el numero
+\graphicspath{{figs/}{../outputs/figures/}{../results/clasificacion/}}
+
 \captionsetup{font=small,labelfont=bf}
 
 \title{\vspace{-1.5em}\textbf{Clasificaci\'on de Se\~nales Eco-Ac\'usticas para la\\
 Identificaci\'on Aut\'onoma de Especies Faun\'isticas}\vspace{-0.3em}}
-\author{\small Equipo X $\cdot$ CS3061 Machine Learning $\cdot$ UTEC}
+\author{\small Equipo 13 $\cdot$ CS3061 Machine Learning $\cdot$ UTEC}
 \date{\vspace{-1em}\small \today}
 
 \begin{document}
@@ -38,63 +39,50 @@ El monitoreo bioac\'ustico pasivo constituye una herramienta clave para la
 conservaci\'on de la biodiversidad, al permitir estimar la presencia de especies
 en un h\'abitat sin intervenci\'on humana directa. En el presente trabajo se aborda
 la identificaci\'on autom\'atica de especies faun\'isticas a partir de registros
-eco-ac\'usticos preprocesados. Formalmente, se dispone de un conjunto de
-$N$ observaciones, donde cada muestra se representa mediante un vector de
-caracter\'isticas $\mathbf{x} \in \mathbb{R}^{64}$ compuesto por los coeficientes
-condensados de la escala Mel (MFCC), $\{\texttt{mel\_0}, \dots, \texttt{mel\_63}\}$.
-Dichos coeficientes capturan las propiedades de frecuencia y timbre de la se\~nal
-de audio digital.
+eco-ac\'usticos preprocesados.
 
-El problema se formula como una tarea de \textbf{clasificaci\'on supervisada
-multiclase} sobre la variable objetivo \texttt{species\_id}, acotada a cinco clases
-($\{10,12,17,18,23\}$) correspondientes a dos anfibios y tres aves
-(Cuadro~\ref{tab:taxonomia}). Las variables \texttt{recording\_id},
-\texttt{songtype\_id} e \texttt{is\_tp} constituyen metadatos y fueron excluidas
-del espacio de predictoras. Cabe destacar que la distribuci\'on de clases es
-\textbf{asim\'etrica}, con una raz\'on de desbalance aproximada de $2{:}1$ entre la clase
-mayoritaria (23, con 553 muestras) y la minoritaria (10, con 277) (Figura~\ref{fig:dist}), condici\'on que determina la
-elecci\'on del \textbf{F1-Score macro} como m\'etrica rectora de la evaluaci\'on.
+Formalmente, cada muestra se representa mediante un vector de caracter\'isticas
+$\mathbf{x} \in \mathbb{R}^{64}$ compuesto por las variables
+$\{\texttt{mel\_0}, \dots, \texttt{mel\_63}\}$, que resumen informaci\'on espectral
+en escala Mel. El problema se formula como una tarea de \textbf{clasificaci\'on
+supervisada multiclase} sobre la variable objetivo \texttt{species\_id}, con cinco
+clases posibles: $\{10,12,17,18,23\}$.
+
+Las variables \texttt{recording\_id}, \texttt{songtype\_id} e \texttt{is\_tp}
+fueron tratadas como metadatos y no se incorporaron al espacio de predictores.
+La distribuci\'on de clases presenta un desbalance moderado, dominado por las
+clases 17 y 23, por lo cual se adopt\'o el \textbf{F1-Score macro} como m\'etrica
+principal.
 
 \begin{table}[H]
 \centering
-\caption{Cat\'alogo taxon\'omico de las clases objetivo del dataset.}
+\caption{Cat\'alogo taxon\'omico y distribuci\'on de clases.}
 \label{tab:taxonomia}
 \small
-\begin{tabular}{cll}
+\begin{tabular}{clcc}
 \toprule
-\texttt{species\_id} & Nombre cient\'ifico & Tipo de fauna \\
+\texttt{species\_id} & Nombre cient\'ifico & Train & Test \\
 \midrule
-10 & \textit{Leptodactylus discodactylus} & Anfibio \\
-12 & \textit{Osteocephalus taurinus}      & Anfibio \\
-17 & \textit{Chiroxiphia lineata}         & Ave \\
-18 & \textit{Saltator grossus}            & Ave \\
-23 & \textit{Pheucticus chrysopeplus}     & Ave \\
+10 & \textit{Leptodactylus discodactylus} & 277 & 69 \\
+12 & \textit{Osteocephalus taurinus}      & 277 & 70 \\
+17 & \textit{Chiroxiphia lineata}         & 521 & 130 \\
+18 & \textit{Saltator grossus}            & 278 & 69 \\
+23 & \textit{Pheucticus chrysopeplus}     & 553 & 139 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.55\textwidth]{figs/fig1_distribucion.png}
-\caption{Distribuci\'on de clases en el conjunto de entrenamiento. Se evidencia el
-desbalance entre especies, dominado por las clases 17 y 23.}
-\label{fig:dist}
-\end{figure}
-
 \subsection{Arquitectura del pipeline}
 La soluci\'on propuesta se estructura como un pipeline integral que abarca desde
 la ingesta de los archivos CSV hasta la inferencia con mitigaci\'on de riesgos.
-La Figura~\ref{fig:arq} ilustra el flujo completo: ingesta y separaci\'on de
-predictoras/metadatos, estandarizaci\'on, exploraci\'on geom\'etrica mediante
-reducci\'on de dimensionalidad, miner\'ia de patrones por clustering,
-entrenamiento comparativo de clasificadores y, finalmente, la pol\'itica de
-moderaci\'on basada en umbrales probabil\'isticos.
+La Figura~\ref{fig:arq} resume el flujo completo: preprocesamiento, reducci\'on de
+dimensionalidad, clustering, clasificaci\'on supervisada, pol\'itica de umbrales y
+despliegue informativo.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.9\textwidth]{figs/fig_arquitectura.png}
-\caption{Arquitectura del pipeline propuesto, desde la matriz base de
-caracter\'isticas Mel hasta el despliegue informativo.}
+\includegraphics[width=0.95\textwidth]{fig_arquitectura.png}
+\caption{Arquitectura general del pipeline propuesto para clasificaci\'on eco-ac\'ustica.}
 \label{fig:arq}
 \end{figure}
 
@@ -104,140 +92,102 @@ caracter\'isticas Mel hasta el despliegue informativo.}
 % ===================================================================
 
 Con el objetivo de visualizar la estructura geom\'etrica del espacio
-$\mathbb{R}^{64}$ y evaluar la separabilidad de las clases, se contrastaron un
-m\'etodo lineal y dos m\'etodos de aproximaci\'on de variedades m\'ultiples.
+$\mathbb{R}^{64}$ y evaluar la separabilidad de las clases, se compararon dos
+enfoques de reducci\'on dimensional: \textbf{PCA}, como m\'etodo lineal, y
+\textbf{UMAP}, como m\'etodo no lineal orientado a preservar vecindades locales.
 
-\subsection{An\'alisis comparativo}
-El \textbf{An\'alisis de Componentes Principales (PCA)} proyecta los datos sobre
-los ejes ortogonales de m\'axima varianza, preservando la \textbf{estructura
-global} de forma lineal. Se determin\'o que se requieren 7 componentes para
-retener el 90\,\% de la varianza y 11 para el 95\,\%
-(Figura~\ref{fig:pcavar}); las dos primeras componentes retienen \'unicamente
-el 67{,}1\,\% de la varianza total, lo que anticipa un solapamiento al proyectar a 2D.
+\subsection{Preprocesamiento com\'un}
+Se trabaj\'o con 1906 observaciones de entrenamiento y 477 observaciones de prueba.
+No se identificaron valores nulos. Las variables predictoras fueron exclusivamente
+las 64 columnas Mel. Para evitar fuga de informaci\'on, el escalador
+\texttt{StandardScaler} se ajust\'o sobre el conjunto de desarrollo y luego se aplic\'o
+sobre validaci\'on y test oficial.
 
-En contraste, \textbf{t-SNE} y \textbf{UMAP} son t\'ecnicas no lineales que
-preservan las \textbf{distancias geom\'etricas locales}, priorizando que las
-vecindades del espacio original se mantengan en la proyecci\'on de baja dimensi\'on.
-La Figura~\ref{fig:proy2d} contrasta las tres proyecciones en 2D y la
-Figura~\ref{fig:umap3d} muestra la proyecci\'on UMAP en 3D.
+\subsection{PCA y UMAP}
+PCA proyecta los datos sobre ejes ortogonales de m\'axima varianza, preservando
+estructura global de manera lineal. En la proyecci\'on 2D, PCA retuvo el
+$67{,}14\,\%$ de la varianza total, pero las clases se observaron altamente
+solapadas. En 3D, la varianza retenida aument\'o a $76{,}77\,\%$.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.55\textwidth]{figs/fig2_pca_varianza.png}
-\caption{Varianza explicada acumulada en funci\'on del n\'umero de componentes
-principales. Las l\'ineas punteadas indican los umbrales del 90\,\% y 95\,\%.}
-\label{fig:pcavar}
-\end{figure}
+UMAP, en cambio, prioriza la preservaci\'on de relaciones locales. Su proyecci\'on
+2D obtuvo un \textit{trustworthiness} de $0{,}9777$, superior al de PCA 2D
+($0{,}8662$), aunque con mayor tiempo de ejecuci\'on. Esto indica que UMAP resulta
+m\'as apropiado para visualizaci\'on exploratoria, mientras que PCA conserva valor
+como transformaci\'on lineal eficiente e interpretable.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth]{figs/fig3_proyecciones2d.png}
-\caption{Proyecciones 2D del espacio Mel coloreadas por especie: PCA (lineal)
-frente a t-SNE y UMAP (variedades). Las t\'ecnicas no lineales separan mejor los
-grupos que la proyecci\'on lineal.}
-\label{fig:proy2d}
+\begin{subfigure}{0.48\textwidth}
+  \includegraphics[width=\textwidth]{pca_2d.png}
+  \caption{Proyecci\'on PCA 2D.}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \includegraphics[width=\textwidth]{umap_2d.png}
+  \caption{Proyecci\'on UMAP 2D.}
+\end{subfigure}
+\caption{Visualizaci\'on del espacio Mel mediante PCA y UMAP.}
+\label{fig:pca_umap}
 \end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.6\textwidth]{figs/fig3b_umap3d.png}
-\caption{Proyecci\'on UMAP en 3 dimensiones del conjunto de entrenamiento.}
-\label{fig:umap3d}
-\end{figure}
-
-\subsection{Justificaci\'on t\'ecnica}
-El Cuadro~\ref{tab:dr} reporta el compromiso entre costo computacional y retenci\'on
-de estructura. PCA result\'o el m\'etodo m\'as eficiente ($0{,}01$\,s) por su naturaleza
-algebraica, pero su \textit{trustworthiness} fue la menor, coherente con su
-incapacidad de capturar relaciones no lineales. t-SNE y UMAP incrementaron el
-tiempo de c\'omputo a $13{,}7$\,s y $25{,}3$\,s respectivamente, a cambio de una mayor
-preservaci\'on de la estructura local (\textit{trustworthiness} de $0{,}987$ y $0{,}977$,
-frente a $0{,}866$ de PCA). En
-consecuencia, las t\'ecnicas de variedades resultan preferibles para la
-\textbf{visualizaci\'on} y la inspecci\'on de separabilidad, mientras que PCA se
-reserva como paso de \textbf{compresi\'on} previo al clustering por su bajo costo y
-su interpretabilidad en t\'erminos de varianza.
 
 \begin{table}[H]
 \centering
-\caption{Comparativa de m\'etodos de reducci\'on de dimensionalidad: tiempo de
-ejecuci\'on y retenci\'on de estructura local (\textit{trustworthiness},
-$k=10$).}
+\caption{Comparativa de reducci\'on dimensional.}
 \label{tab:dr}
 \small
-\begin{tabular}{lccl}
+\begin{tabular}{lcccc}
 \toprule
-M\'etodo & Tiempo (s) & \textit{Trustworthiness} & Tipo \\
+M\'etodo & Dimensiones & Tiempo (s) & Varianza explicada & Trustworthiness \\
 \midrule
-PCA   & $0{,}01$  & $0{,}866$ & Lineal (varianza global) \\
-t-SNE & $13{,}69$ & $0{,}987$ & Variedad (estructura local) \\
-UMAP  & $25{,}25$ & $0{,}977$ & Variedad (estructura local) \\
+PCA  & 2 & $0{,}1599$  & $0{,}6714$ & $0{,}8662$ \\
+PCA  & 3 & $0{,}0034$  & $0{,}7677$ & $0{,}9403$ \\
+UMAP & 2 & $26{,}0173$ & --         & $0{,}9777$ \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+La inspecci\'on visual confirma que las especies no forman regiones perfectamente
+separables en baja dimensi\'on. Este comportamiento anticipa que la clasificaci\'on
+supervisada presentar\'a dificultad, especialmente por el solapamiento entre firmas
+ac\'usticas de especies distintas.
 
 % ===================================================================
 \section{Miner\'ia de Patrones y Estructuras de Clustering}
 % ===================================================================
 
-Se evaluaron dos algoritmos de aprendizaje no supervisado basados en paradigmas
-distintos. Dado que, seg\'un la Secci\'on~\ref{sec:dr} (Figura~\ref{fig:pcavar}), $11$
-componentes principales son suficientes para retener el $95\,\%$ de la varianza, el
-clustering se aplic\'o sobre dicho subespacio en lugar del espacio original
-$\mathbb{R}^{64}$. Esta compresi\'on previa reduce el ruido y el costo computacional
-sin sacrificar informaci\'on relevante, y mitiga el efecto de la \textit{maldici\'on de
-la dimensionalidad} sobre las m\'etricas basadas en distancias.
+Se evaluaron dos algoritmos de aprendizaje no supervisado: \textbf{Gaussian Mixture
+Model (GMM)} y \textbf{DBSCAN}. GMM adopta un enfoque probabil\'istico, modelando los
+datos como una mezcla de distribuciones gaussianas, mientras que DBSCAN agrupa
+regiones densas y etiqueta como ruido los puntos aislados.
 
-\subsection{Segmentaci\'on org\'anica}
-El \textbf{Gaussian Mixture Model (GMM)} adopta un paradigma \textbf{probabil\'istico}:
-modela los datos como una mezcla de $k$ distribuciones gaussianas y asigna a cada
-punto una probabilidad de pertenencia (\textit{soft assignment}). El
-\textbf{DBSCAN} adopta un paradigma de \textbf{densidad}: agrupa regiones densas y
-etiqueta como ruido los puntos aislados, sin requerir la especificaci\'on previa
-del n\'umero de grupos, pero con fuerte dependencia del hiperpar\'ametro $\varepsilon$.
-El valor de $\varepsilon$ se estim\'o mediante el gr\'afico de $k$-distancia
-(Figura~\ref{fig:kdist}), identificando el codo de la curva, y se realiz\'o un
-barrido fino alrededor de dicho valor.
-
-\subsection{M\'etricas de validaci\'on}
-La elecci\'on del n\'umero \'optimo de grupos se sustent\'o exclusivamente en
-\textbf{m\'etricas internas} (que no emplean las etiquetas reales): el
-\textbf{Coeficiente de Silhouette}, el \'indice de \textbf{Davies-Bouldin} y el de
-\textbf{Calinski-Harabasz} (Figura~\ref{fig:metricas}). El criterio de Silhouette
-sugiri\'o $k=2$ grupos para GMM ($s=0{,}182$), valor corroborado por las restantes
-m\'etricas internas (m\'inimo de Davies-Bouldin y m\'aximo de Calinski-Harabasz en $k=2$)
-y por el criterio BIC (Figura~\ref{fig:gmmsel}). El Cuadro~
-\ref{tab:clust} sintetiza el desempe\~no; adicionalmente, el \'indice de Rand
-ajustado (ARI), calculado de forma externa, cuantifica el grado de alineaci\'on
-entre los grupos descubiertos y la taxonom\'ia real.
+El clustering se aplic\'o sobre representaciones reducidas mediante PCA, con el fin
+de disminuir ruido y costo computacional. La selecci\'on de hiperpar\'ametros se
+apoy\'o en m\'etricas internas: Silhouette, Davies-Bouldin y Calinski-Harabasz.
 
 \begin{figure}[H]
 \centering
 \begin{subfigure}{0.48\textwidth}
-  \includegraphics[width=\textwidth]{figs/fig4_gmm_silhouette_bic.png}
-  \caption{GMM: Silhouette y BIC frente a $k$.}
-  \label{fig:gmmsel}
+  \includegraphics[width=\textwidth]{fig4_gmm_silhouette_bic.png}
+  \caption{Selecci\'on de componentes en GMM.}
 \end{subfigure}\hfill
 \begin{subfigure}{0.48\textwidth}
-  \includegraphics[width=\textwidth]{figs/fig5_dbscan_kdist.png}
-  \caption{DBSCAN: gr\'afico de $k$-distancia.}
-  \label{fig:kdist}
+  \includegraphics[width=\textwidth]{fig5_dbscan_kdist.png}
+  \caption{Gr\'afico de distancia para DBSCAN.}
 \end{subfigure}
-\caption{Selecci\'on de hiperpar\'ametros para los dos algoritmos de clustering.}
+\caption{Selecci\'on de hiperpar\'ametros para clustering.}
+\label{fig:cluster_params}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth]{figs/fig4b_metricas_internas.png}
-\caption{Validaci\'on interna cruzada del n\'umero de grupos en GMM mediante
-Silhouette, Davies-Bouldin y Calinski-Harabasz.}
-\label{fig:metricas}
+\includegraphics[width=0.85\textwidth]{fig4b_metricas_internas.png}
+\caption{Validaci\'on interna de clustering mediante Silhouette, Davies-Bouldin y
+Calinski-Harabasz.}
+\label{fig:metricas_cluster}
 \end{figure}
 
 \begin{table}[H]
 \centering
-\caption{Comparativa de los algoritmos de clustering. ARI se reporta como
-referencia externa de alineaci\'on con \texttt{species\_id}.}
+\caption{Resultados principales de clustering.}
 \label{tab:clust}
 \small
 \begin{tabular}{lcccc}
@@ -245,132 +195,109 @@ referencia externa de alineaci\'on con \texttt{species\_id}.}
 M\'etodo & Paradigma & Grupos & Silhouette & ARI \\
 \midrule
 GMM    & Probabil\'istico & 2 & $0{,}182$ & $0{,}026$ \\
-DBSCAN & Densidad        & 2 & --       & $0{,}003$ \\
+DBSCAN & Densidad        & 2 & --        & $0{,}003$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Los valores de Silhouette pr\'oximos a cero y los \'indices ARI cercanos a $0$
-($0{,}026$ para GMM y $0{,}003$ para DBSCAN) constituyen un hallazgo relevante: la
-estructura no supervisada del espacio Mel \textbf{no se organiza en cinco grupos
-densos separables} que coincidan con la taxonom\'ia. Ambos algoritmos favorecen
-$k=2$, lo que sugiere una separaci\'on macrosc\'opica (posiblemente se\~nal robusta
-frente a registros ruidosos, o anfibios frente a aves) antes que la discriminaci\'on
-fina entre especies. Este solapamiento ac\'ustico anticipa la dificultad intr\'inseca
-de la tarea de clasificaci\'on supervisada abordada en la siguiente secci\'on.
+Los valores de Silhouette cercanos a cero y los ARI pr\'oximos a cero evidencian
+que la estructura no supervisada del espacio Mel no se organiza en cinco grupos
+densos equivalentes a las especies reales. Esto refuerza la necesidad de modelos
+supervisados capaces de aprender fronteras de decisi\'on m\'as complejas.
 
 % ===================================================================
 \section{Arquitectura de Clasificaci\'on: MLP vs. Modelos de Ensamble}
 % ===================================================================
 
 \subsection{Dise\~no de la red neuronal}
-Se implement\'o un Perceptr\'on Multicapa (MLP) en PyTorch. Para la clasificaci\'on
-multiclase se emple\'o como funci\'on de p\'erdida la \textbf{entrop\'ia cruzada
-categ\'orica ponderada}. Dada una observaci\'on con logits de salida
-$\mathbf{z} = (z_1, \dots, z_C)$, la capa \textit{softmax} produce la distribuci\'on
-de probabilidad
+Se implement\'o un Perceptr\'on Multicapa (MLP) en PyTorch para clasificaci\'on
+multiclase. La funci\'on de p\'erdida utilizada fue la \textbf{entrop\'ia cruzada
+categ\'orica}, implementada mediante \texttt{nn.CrossEntropyLoss}. Para una muestra
+con logits $\mathbf{z} = (z_1,\dots,z_C)$, la probabilidad predicha para la clase
+$k$ se obtiene mediante \textit{softmax}:
+
 \begin{equation}
-\hat{p}_k = \frac{e^{z_k}}{\sum_{j=1}^{C} e^{z_j}}, \qquad k = 1,\dots,C,
+\hat{p}_k = \frac{e^{z_k}}{\sum_{j=1}^{C} e^{z_j}}, \qquad k = 1,\dots,C.
 \end{equation}
-y la p\'erdida total sobre $N$ observaciones se define como
+
+La p\'erdida sobre $N$ observaciones se define como:
+
 \begin{equation}
-\mathcal{L} = -\sum_{i=1}^{N} w_{y_i} \, \log \hat{p}_{i,\,y_i},
+\mathcal{L} = - \frac{1}{N}\sum_{i=1}^{N}\sum_{c=1}^{C}
+\mathbb{1}[y_i=c]\log(\hat{p}_{i,c}).
 \end{equation}
-donde $y_i$ es la clase verdadera de la muestra $i$ y $w_{y_i}$ es el peso asignado
-a dicha clase, calculado de forma inversamente proporcional a su frecuencia para
-\textbf{compensar el desbalance}. El Cuadro~\ref{tab:topo} detalla la topolog\'ia de
-la red.
 
 \begin{table}[H]
 \centering
-\caption{Topolog\'ia de la red MLP (configuraci\'on recomendada
-Linear$\to$BatchNorm$\to$ReLU$\to$Dropout).}
+\caption{Topolog\'ia base de la red MLP.}
 \label{tab:topo}
 \small
 \begin{tabular}{clcc}
 \toprule
 Capa & Tipo & Neuronas & Activaci\'on \\
 \midrule
-Entrada & --              & 64  & --   \\
-Oculta 1 & Linear+BN+Dropout & 128 & ReLU \\
-Oculta 2 & Linear+BN+Dropout & 64  & ReLU \\
-Salida   & Linear            & 5   & Softmax \\
+Entrada & --     & 64  & -- \\
+Oculta 1 & Linear & 128 & ReLU \\
+Oculta 2 & Linear & 64  & ReLU \\
+Oculta 3 & Linear & 32  & ReLU \\
+Salida   & Linear & 5   & Softmax impl\'icito \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsection{Estrategia de regularizaci\'on}
-Se analiz\'o emp\'iricamente el impacto de la \textbf{posici\'on relativa} de las
-capas de Dropout y Batch Normalization sobre la estabilidad de las curvas de
-aprendizaje. La Figura~\ref{fig:curvas} contrasta el orden
-Linear$\to$BatchNorm$\to$ReLU$\to$Dropout frente a
-Linear$\to$Dropout$\to$BatchNorm$\to$ReLU. Se observ\'o que la configuraci\'on
-Linear$\to$BatchNorm$\to$ReLU$\to$Dropout produjo curvas de validaci\'on m\'as
-estables y una menor brecha entre las p\'erdidas de entrenamiento y validaci\'on,
-raz\'on por la cual fue adoptada en el modelo final. Situar la normalizaci\'on antes
-del \textit{dropout} permite que las estad\'isticas de cada \textit{batch} se estimen
-sobre activaciones completas, evitando la inestabilidad que introduce normalizar
-sobre un subconjunto ya diezmado de neuronas. No obstante, en ambas configuraciones
-se observa que, a partir de la \'epoca $\sim\!20$, la p\'erdida de validaci\'on se
-estabiliza e incluso repunta ligeramente mientras la de entrenamiento contin\'ua
-descendiendo: una se\~nal de \textbf{sobreajuste leve} que la regularizaci\'on acota
-pero no elimina. Este comportamiento justifica el uso de \textit{dropout} y sugiere que
-la incorporaci\'on de \textit{early stopping} en torno a dicha \'epoca constituir\'ia una
-mejora directa para futuras iteraciones.
+\subsection{Regularizaci\'on y curvas de aprendizaje}
+Se compararon cinco variantes del MLP: modelo base, MLP con Dropout, MLP con
+Batch Normalization, Dropout seguido de Batch Normalization y Batch Normalization
+seguido de Dropout. La mejor variante fue \textbf{MLP + Dropout post-activaci\'on},
+con F1-macro de $0{,}4650$ y accuracy de $0{,}5157$.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth]{figs/fig6_curvas_aprendizaje.png}
-\caption{Curvas de aprendizaje (p\'erdida frente a \'epocas) seg\'un la posici\'on
-relativa de las capas de Batch Normalization y Dropout.}
+\includegraphics[width=0.95\textwidth]{curvas_aprendizaje_comparativas.png}
+\caption{Curvas de aprendizaje comparativas para las variantes del MLP.}
 \label{fig:curvas}
 \end{figure}
 
-\subsection{Benchmarking computacional}
-El MLP se compar\'o contra \textbf{XGBoost}, un modelo de ensamble basado en
-\textit{gradient boosting} de \'arboles de decisi\'on. La evaluaci\'on se sostuvo
-sobre el \textbf{F1-Score macro} y el an\'alisis de las \textbf{matrices de
-confusi\'on} (Figura~\ref{fig:cm}), dada la inadecuaci\'on de la m\'etrica
-\textit{accuracy} ante el desbalance de clases. El MLP alcanz\'o un F1-macro de
-$0{,}464$, mientras que XGBoost obtuvo $0{,}453$, situando a ambos modelos
-sensiblemente por encima del azar te\'orico ($\approx 0{,}20$ para cinco clases) pero
-en un r\'egimen de dificultad elevada, coherente con el solapamiento detectado en la
-fase no supervisada. La red neuronal super\'o marginalmente al modelo de ensamble.
-Un an\'alisis desagregado por clase (Cuadro~\ref{tab:recall}) explica esta ventaja.
-El XGBoost concentra su acierto en las clases mayoritarias --recall de $0{,}64$ en la
-clase 23 y $0{,}58$ en la 17--, a costa de penalizar severamente a las minoritarias
-(recall de apenas $0{,}30$ en la clase 18). El MLP, gracias a la ponderaci\'on de la
-p\'erdida, distribuye el acierto de forma m\'as equitativa entre clases (recall entre
-$0{,}38$ y $0{,}58$, sin ninguna clase abandonada), lo que eleva su F1-macro por encima
-del ensamble pese a una \textit{accuracy} global similar. El error dominante no
-se limita a las tres aves: la mayor masa de confusi\'on se produce entre las clases 23
-(ave) y 10 (anfibio) en ambos modelos ($47$ casos $23\!\to\!10$ en el MLP y $30$ casos
-$10\!\to\!23$ en XGBoost), lo que sugiere que el solapamiento en el espacio Mel
-trasciende la frontera taxonom\'ica y refuerza la dificultad intr\'inseca anticipada por
-el an\'alisis no supervisado.
+\subsection{Modelos de ensamble}
+El MLP se compar\'o contra cuatro modelos de ensamble: XGBoost, LightGBM, Gradient
+Boosting y Random Forest. El mejor ensamble fue \textbf{XGBoost}, con F1-macro de
+$0{,}4519$ y accuracy de $0{,}5052$.
 
 \begin{table}[H]
 \centering
-\caption{Recall por clase en el conjunto de prueba. El MLP (con p\'erdida ponderada)
-reparte el acierto de forma m\'as homog\'enea; XGBoost privilegia las clases
-mayoritarias.}
-\label{tab:recall}
+\caption{Comparaci\'on de modelos supervisados sobre el conjunto de prueba.}
+\label{tab:modelos}
 \small
-\begin{tabular}{cccccc}
+\begin{tabular}{lcccc}
 \toprule
-Modelo & Clase 10 & Clase 12 & Clase 17 & Clase 18 & Clase 23 \\
+Modelo & Tipo & F1-Macro & Accuracy & Inferencia (s) \\
 \midrule
-MLP     & $0{,}58$ & $0{,}53$ & $0{,}40$ & $0{,}57$ & $0{,}38$ \\
-XGBoost & $0{,}36$ & $0{,}36$ & $0{,}58$ & $0{,}30$ & $0{,}64$ \\
+MLP + Dropout & MLP & $0{,}4650$ & $0{,}5157$ & $0{,}0013$ \\
+XGBoost & Ensamble & $0{,}4519$ & $0{,}5052$ & $0{,}0089$ \\
+LightGBM & Ensamble & $0{,}4351$ & $0{,}4864$ & $0{,}0211$ \\
+Gradient Boosting & Ensamble & $0{,}4364$ & $0{,}4927$ & $0{,}0116$ \\
+Random Forest & Ensamble & $0{,}3842$ & $0{,}4759$ & $0{,}1852$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
+La red MLP obtuvo el mejor F1-macro y el menor tiempo de inferencia. XGBoost fue el
+mejor modelo de ensamble y se conserv\'o como alternativa robusta para comparaci\'on
+y despliegue. Los valores obtenidos confirman que el problema es complejo: los
+modelos superan el azar te\'orico para cinco clases, pero el solapamiento ac\'ustico
+limita la separabilidad perfecta.
+
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth]{figs/fig7_matrices_confusion.png}
-\caption{Matrices de confusi\'on en el conjunto de prueba para el MLP (izquierda) y
-XGBoost (derecha).}
+\includegraphics[width=0.95\textwidth]{comparacion_metricas_todos.png}
+\caption{Comparaci\'on global de m\'etricas entre MLP y modelos de ensamble.}
+\label{fig:metricas_modelos}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{comparacion_matrices_confusion.png}
+\caption{Matrices de confusi\'on comparativas para los modelos principales.}
 \label{fig:cm}
 \end{figure}
 
@@ -379,65 +306,68 @@ XGBoost (derecha).}
 % ===================================================================
 
 \subsection{An\'alisis de \textit{trade-offs}}
-La selecci\'on del modelo de despliegue contempla el compromiso entre rendimiento
-anal\'itico y costo computacional. El Cuadro~\ref{tab:tradeoff} contrasta el
-F1-macro frente al tiempo de inferencia por registro. En este caso el MLP resulta
-doblemente preferible: ofrece el mejor F1-macro ($0{,}464$ frente a $0{,}453$) y, a la
-vez, el menor tiempo de inferencia ($0{,}693$\,ms por registro, frente a los
-$2{,}420$\,ms de XGBoost, unas $3{,}5$ veces m\'as lento). El costo del ensamble se
-concentra adem\'as en su fase de entrenamiento. En consecuencia, para el volumen de
-registros esperado en un despliegue de monitoreo continuo, el MLP domina el
-compromiso rendimiento--latencia y se adopta como modelo de producci\'on.
-
-\begin{table}[H]
-\centering
-\caption{Compromiso entre rendimiento (F1-macro) y costo (tiempo de inferencia por
-registro).}
-\label{tab:tradeoff}
-\small
-\begin{tabular}{lcc}
-\toprule
-Modelo & F1-macro & Inferencia (ms/registro) \\
-\midrule
-MLP     & $0{,}464$ & $0{,}693$ \\
-XGBoost & $0{,}453$ & $2{,}420$ \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsection{Pol\'iticas de moderaci\'on}
-Se dise\~n\'o una pol\'itica operativa basada en el vector de probabilidades de
-salida del modelo \'optimo, que define tres estados seg\'un la probabilidad
-predictiva m\'axima $P = \max_k \hat{p}_k$:
-\begin{itemize}[noitemsep,topsep=2pt]
-  \item \textbf{Zona de Confianza} ($P \geq 0.85$): clasificaci\'on autom\'atica
-  (alerta verde). Cubri\'o el $4{,}0$\,\% de los registros de prueba (19 de 477),
-  con una exactitud de $0{,}789$ en dicha zona.
-  \item \textbf{Zona de Incertidumbre} ($0.40 \leq P < 0.85$): clasificaci\'on
-  asistida; el registro se deriva a una cola de auditor\'ia humana (alerta amarilla).
-  \item \textbf{Zona de Rechazo} ($P < 0.40$): descarte autom\'atico para mitigar el
-  impacto del ruido ambiental (alerta roja).
-\end{itemize}
-La Figura~\ref{fig:zonas} muestra la distribuci\'on de la confianza del modelo y la
-ubicaci\'on de los umbrales. La pol\'itica exhibe un \textbf{compromiso claro entre
-cobertura y fiabilidad}: la Zona de Confianza automatiza solo el $4{,}0$\,\% de los
-registros, pero en esa fracci\'on la exactitud asciende a $0{,}789$, muy por encima de
-la \textit{accuracy} global ($\approx 0{,}46$). Es decir, el umbral $P\geq 0{,}85$
-act\'ua como un filtro de alta precisi\'on: sacrifica volumen de automatizaci\'on a
-cambio de fiabilidad en lo que efectivamente automatiza. El grueso de las detecciones
-($74{,}8$\,\% en la Zona de Incertidumbre) se deriva a auditor\'ia humana y un
-$21{,}2$\,\% se descarta como ruido. Dada la criticidad ecol\'ogica de un falso
-positivo, la
-pol\'itica conservadora actual --que env\'ia el $75{,}7\,\%$ de los registros a auditoria--
-resulta prudente.
+La selecci\'on del modelo final debe considerar tanto el rendimiento predictivo como
+el costo computacional. El MLP + Dropout obtuvo el mejor F1-macro y tambi\'en la
+menor latencia de inferencia. XGBoost entren\'o m\'as r\'apido, pero su inferencia fue
+m\'as lenta que la del MLP.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.6\textwidth]{figs/fig8_zonas_confianza.png}
-\caption{Distribuci\'on de la probabilidad m\'axima (confianza) del modelo y zonas
-operativas definidas por los umbrales 0.40 y 0.85.}
-\label{fig:zonas}
+\includegraphics[width=0.78\textwidth]{tradeoff_costo_rendimiento.png}
+\caption{Compromiso entre costo computacional y rendimiento predictivo.}
+\label{fig:tradeoff}
 \end{figure}
+
+\subsection{Pol\'itica de umbrales}
+Se implement\'o una pol\'itica operativa basada en la probabilidad predictiva
+m\'axima $P = \max_k \hat{p}_k$. Se definieron tres zonas:
+
+\begin{itemize}[noitemsep,topsep=2pt]
+  \item \textbf{Zona de confianza} ($P \geq 0.85$): clasificaci\'on autom\'atica.
+  \item \textbf{Zona de incertidumbre} ($0.40 \leq P < 0.85$): revisi\'on asistida.
+  \item \textbf{Zona de rechazo} ($P < 0.40$): descarte autom\'atico.
+\end{itemize}
+
+Sobre el conjunto de prueba, la zona de confianza concentr\'o 64 muestras
+($13{,}4\,\%$), con accuracy de $0{,}6250$ y F1 de $0{,}4934$. La zona de
+incertidumbre incluy\'o 375 muestras ($78{,}6\,\%$), con accuracy de $0{,}4960$ y
+F1 de $0{,}4521$. La zona de rechazo agrup\'o 38 muestras ($8{,}0\,\%$), con accuracy
+de $0{,}3947$ y F1 de $0{,}3880$.
+
+Esta pol\'itica permite mitigar riesgos operativos: las predicciones con alta
+confianza pueden automatizarse, mientras que los casos ambiguos se derivan a
+validaci\'on humana.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{politica_umbrales.png}
+\caption{Pol\'itica de umbrales basada en la probabilidad m\'axima predicha.}
+\label{fig:umbrales}
+\end{figure}
+
+\subsection{Despliegue informativo}
+Se desarroll\'o una aplicaci\'on en Streamlit para simular inferencia sobre nuevas
+observaciones. La aplicaci\'on carga el escalador, el codificador de etiquetas y los
+modelos entrenados desde la carpeta \texttt{models/}. El flujo de inferencia aplica
+el mismo preprocesamiento usado durante entrenamiento, obtiene probabilidades por
+clase y asigna la predicci\'on a una zona operativa seg\'un la pol\'itica de umbrales.
+
+% ===================================================================
+\section*{Conclusiones}
+% ===================================================================
+
+El proyecto implement\'o un pipeline completo de aprendizaje autom\'atico para
+clasificaci\'on eco-ac\'ustica usando 64 caracter\'isticas Mel. La exploraci\'on
+geom\'etrica mostr\'o solapamiento entre especies, especialmente en PCA, mientras que
+UMAP preserv\'o mejor la estructura local. El clustering no supervisado evidenci\'o
+que las especies no forman cinco grupos naturalmente separables en el espacio de
+caracter\'isticas.
+
+En clasificaci\'on supervisada, el mejor modelo fue MLP + Dropout, con F1-macro de
+$0{,}4650$, seguido por XGBoost con $0{,}4519$. Aunque los resultados reflejan la
+dificultad del problema, la pol\'itica de umbrales permite controlar el riesgo de
+automatizar predicciones inciertas y aporta una estrategia realista para un sistema
+de monitoreo asistido.
 
 % ===================================================================
 \section*{Referencias}
@@ -445,10 +375,10 @@ operativas definidas por los umbrales 0.40 y 0.85.}
 \begin{enumerate}[noitemsep,topsep=2pt]
   \item McInnes, L., Healy, J., \& Melville, J. (2018). \textit{UMAP: Uniform
   Manifold Approximation and Projection for Dimension Reduction}. arXiv:1802.03426.
-  \item van der Maaten, L., \& Hinton, G. (2008). Visualizing data using t-SNE.
-  \textit{Journal of Machine Learning Research}, 9, 2579--2605.
   \item Chen, T., \& Guestrin, C. (2016). XGBoost: A Scalable Tree Boosting System.
   \textit{KDD '16}.
+  \item Ke, G. et al. (2017). LightGBM: A Highly Efficient Gradient Boosting
+  Decision Tree. \textit{NeurIPS}.
   \item Pedregosa et al. (2011). Scikit-learn: Machine Learning in Python.
   \textit{JMLR}, 12, 2825--2830.
 \end{enumerate}
@@ -462,14 +392,13 @@ operativas definidas por los umbrales 0.40 y 0.85.}
 \caption{Matriz de coevaluaci\'on del equipo de desarrollo.}
 \label{tab:coev}
 \small
-\begin{tabular}{p{5.5cm}cp{6cm}}
+\begin{tabular}{p{4.8cm}cp{7cm}}
 \toprule
 \textbf{Nombre del Integrante} & \textbf{\% Contribuci\'on} & \textbf{Tareas encargadas} \\
 \midrule
-1.\quad NOMBRE 1 & XX\,\% & Tareas... \\
-2.\quad NOMBRE 2 & XX\,\% & Tareas... \\
-3.\quad NOMBRE 3 & XX\,\% & Tareas... \\
-4.\quad NOMBRE 4 & XX\,\% & Tareas... \\
+Marco Apolinario Lainez & 100\,\% & Preprocesamiento, validaci\'on del dataset, escalamiento, PCA, UMAP, figuras y tablas base. \\
+Diego & 100\,\% & Clustering no supervisado con GMM y DBSCAN, selecci\'on de hiperpar\'ametros y m\'etricas internas. \\
+Luc\'ia & 100\,\% & Clasificaci\'on supervisada, MLP, modelos de ensamble, guardado de modelos, pol\'itica de umbrales y app Streamlit. \\
 \bottomrule
 \end{tabular}
 \end{table}

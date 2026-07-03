@@ -70,7 +70,7 @@ print("=" * 72)
 
 X_train = pd.read_csv(DATA_DIR / "X_train_full_scaled.csv")
 X_val   = pd.read_csv(DATA_DIR / "X_val_scaled.csv")
-X_test  = pd.read_csv(DATA_DIR / "X_test_official.csv")
+X_test = pd.read_csv(DATA_DIR / "X_test_official_scaled.csv")
 
 y_train_raw = pd.read_csv(DATA_DIR / "y_train_full.csv")
 y_val_df    = pd.read_csv(DATA_DIR / "y_val.csv")

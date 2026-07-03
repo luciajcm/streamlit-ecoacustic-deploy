@@ -5,6 +5,15 @@ __pycache__/
 .venv/
 venv/
 
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.toc
+
+.DS_Store
+Thumbs.db
+
 # Carpeta de figuras duplicada del Integrante 2 (las oficiales estan en report/figs y outputs/figures)
 figs/
 
