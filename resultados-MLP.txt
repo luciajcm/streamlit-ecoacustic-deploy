@@ -1,0 +1,234 @@
+========================================================================
+1. CARGA DE DATOS PROCESADOS
+========================================================================
+Columnas en class_mapping.csv: ['encoded_label', 'species_id', 'scientific_name']
+Primeras filas:
+   encoded_label  species_id              scientific_name
+0              0          10  Leptodactylus discodactylus
+1              1          12       Osteocephalus taurinus
+2              2          17          Chiroxiphia lineata
+3              3          18             Saltator grossus
+4              4          23      Pheucticus chrysopeplus
+
+Train : 1906 muestras × 64 features
+Val   : 382 muestras
+Test  : 477 muestras
+Clases: 5 → ['Leptodactylus discodactylus', 'Osteocephalus taurinus', 'Chiroxiphia lineata', 'Saltator grossus', 'Pheucticus chrysopeplus']
+
+========================================================================
+2. FUNCIÓN DE PÉRDIDA — CROSS-ENTROPY CATEGÓRICA
+========================================================================
+
+==============================================================================
+ESPECIFICACIÓN MATEMÁTICA FORMAL — FUNCIÓN DE PÉRDIDA
+==============================================================================
+
+Sea D = {(x_i, y_i)}_{i=1}^{N} el conjunto de N muestras, donde
+  x_i ∈ ℝ^{64}  es el vector de coeficientes MFCC (mel_0 … mel_63)
+  y_i ∈ {0, 1, 2, 3, 4} es la etiqueta de clase codificada.
+
+La función de pérdida empleada es la Entropía Cruzada Categórica:
+
+                        N   C
+       L(θ) = − (1/N)  Σ   Σ   𝟙[y_i = c] · log(ŷ_{i,c})
+                       i=1 c=1
+
+donde:
+  θ          → parámetros entrenables (pesos W y sesgos b)
+  C = 5      → número de clases objetivo
+  𝟙[·]      → indicador de Kronecker
+  ŷ_{i,c}    → probabilidad predicha para la clase c en la muestra i
+
+La probabilidad se obtiene mediante la función Softmax:
+
+              exp(z_{i,c})
+  ŷ_{i,c} = ─────────────────
+              Σ_{j=1}^{C} exp(z_{i,j})
+
+con z_{i,c} = W_c^T · h_i + b_c  (logit de la capa de salida).
+
+Propiedades:
+  • L(θ) ≥ 0  ∀θ
+  • L(θ) = 0  ⇔  ŷ_{i,c} = 𝟙[y_i = c]  (clasificación perfecta)
+  • Es convexa respecto a los logits → garantiza convergencia con GD
+
+Implementación en PyTorch: nn.CrossEntropyLoss()
+  Combina internamente LogSoftmax + NLLLoss para estabilidad numérica.
+==============================================================================
+
+
+========================================================================
+3. DEFINICIÓN DE ARQUITECTURAS MLP
+========================================================================
+
+========================================================================
+4. TABLA DE ARQUITECTURA DE LA RED NEURONAL
+========================================================================
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║              TOPOLOGÍA DETALLADA DE LA RED NEURONAL MLP                   ║
+╠════════════════╦═══════════╦══════════╦═════════════╦═════════════════════╣
+║ Capa           ║ Tipo      ║ Neuronas ║ Activación   ║ Parámetros          ║
+╠════════════════╬═══════════╬══════════╬═════════════╬═════════════════════╣
+║ Input          ║ —         ║    64    ║     —        ║         0           ║
+║ Hidden 1       ║ Linear    ║   128    ║     —        ║     8 320           ║
+║ Activation 1   ║ ReLU      ║   128    ║   ReLU       ║         0           ║
+║ Hidden 2       ║ Linear    ║    64    ║     —        ║     8 256           ║
+║ Activation 2   ║ ReLU      ║    64    ║   ReLU       ║         0           ║
+║ Hidden 3       ║ Linear    ║    32    ║     —        ║     2 080           ║
+║ Activation 3   ║ ReLU      ║    32    ║   ReLU       ║         0           ║
+║ Output         ║ Linear    ║     5    ║  Softmax*    ║       165           ║
+╠════════════════╬═══════════╬══════════╬═════════════╬═════════════════════╣
+║ TOTAL          ║           ║          ║              ║    18 821           ║
+╚════════════════╩═══════════╩══════════╩═════════════╩═════════════════════╝
+* Softmax implícito en nn.CrossEntropyLoss.
+
+
+========================================================================
+6. EXPERIMENTOS: DROPOUT Y BATCH NORMALIZATION
+========================================================================
+Dispositivo: cpu
+
+--- MLP Base (Sin Regularización) ---
+    Epoch   25/150  |  Train 0.8870  |  Val 0.8232
+    Epoch   50/150  |  Train 0.5753  |  Val 0.5533
+    Epoch   75/150  |  Train 0.3678  |  Val 0.4942
+    Epoch  100/150  |  Train 0.2285  |  Val 0.1885
+    Epoch  125/150  |  Train 0.1731  |  Val 0.1229
+    Epoch  150/150  |  Train 0.0707  |  Val 0.0546
+    F1-Macro: 0.2942  |  Acc: 0.3480  |  T_Train: 7.09s
+
+--- MLP + Dropout (post-activación) ---
+    Epoch   25/150  |  Train 1.2329  |  Val 1.1339
+    Epoch   50/150  |  Train 1.1416  |  Val 1.0492
+    Epoch   75/150  |  Train 1.0678  |  Val 0.9736
+    Epoch  100/150  |  Train 1.0412  |  Val 0.8944
+    Epoch  125/150  |  Train 0.9557  |  Val 0.8246
+    Epoch  150/150  |  Train 0.9089  |  Val 0.7610
+    F1-Macro: 0.3470  |  Acc: 0.4025  |  T_Train: 8.24s
+
+--- MLP + BatchNorm (post-activación) ---
+    Epoch   25/150  |  Train 0.7271  |  Val 0.6212
+    Epoch   50/150  |  Train 0.4414  |  Val 0.3472
+    Epoch   75/150  |  Train 0.3325  |  Val 0.2599
+    Epoch  100/150  |  Train 0.2399  |  Val 0.1313
+    Epoch  125/150  |  Train 0.2142  |  Val 0.0897
+    Epoch  150/150  |  Train 0.1060  |  Val 0.0563
+    F1-Macro: 0.3015  |  Acc: 0.3501  |  T_Train: 9.78s
+
+--- MLP + Dropout → BatchNorm ---
+    Epoch   25/150  |  Train 1.2738  |  Val 1.1654
+    Epoch   50/150  |  Train 1.1659  |  Val 1.0831
+    Epoch   75/150  |  Train 1.1395  |  Val 1.0183
+    Epoch  100/150  |  Train 1.0799  |  Val 0.9539
+    Epoch  125/150  |  Train 1.0363  |  Val 0.8807
+    Epoch  150/150  |  Train 0.9972  |  Val 0.8400
+    F1-Macro: 0.3817  |  Acc: 0.4298  |  T_Train: 11.29s
+
+--- MLP + BatchNorm → Dropout ---
+    Epoch   25/150  |  Train 1.2671  |  Val 1.1103
+    Epoch   50/150  |  Train 1.1387  |  Val 1.0387
+    Epoch   75/150  |  Train 1.0924  |  Val 0.9561
+    Epoch  100/150  |  Train 1.0499  |  Val 0.8809
+    Epoch  125/150  |  Train 0.9703  |  Val 0.8206
+    Epoch  150/150  |  Train 0.9365  |  Val 0.7826
+    F1-Macro: 0.3402  |  Acc: 0.4046  |  T_Train: 12.28s
+
+========================================================================
+7. GENERANDO GRÁFICAS DE CURVAS DE APRENDIZAJE
+========================================================================
+  ✓ curvas_aprendizaje_comparativas.png
+  ✓ curvas_aprendizaje_detalladas.png
+  ✓ curvas_aprendizaje_zoom.png
+
+★ Mejor MLP : MLP + Dropout → BatchNorm | F1: 0.3817 | Acc: 0.4298
+
+========================================================================
+9. IMPLEMENTACIÓN DE MODELOS DE ENSAMBLE
+========================================================================
+
+--- XGBoost ---
+    F1-Macro: 0.3804  |  F1-Weighted: 0.4147  |  Acc: 0.4403  |  T_Train: 4.15s
+
+--- LightGBM ---
+    F1-Macro: 0.3674  |  F1-Weighted: 0.4113  |  Acc: 0.4465  |  T_Train: 1.08s
+
+--- Gradient Boosting ---
+    F1-Macro: 0.3655  |  F1-Weighted: 0.4045  |  Acc: 0.4382  |  T_Train: 41.81s
+
+--- Random Forest ---
+    F1-Macro: 0.3034  |  F1-Weighted: 0.3585  |  Acc: 0.4214  |  T_Train: 1.20s
+
+★ Mejor Ensamble: XGBoost | F1: 0.3804 | Acc: 0.4403
+
+========================================================================
+10. COMPARACIÓN RIGUROSA: MLP vs ENSAMBLE
+========================================================================
+
+                           Modelo     Tipo  F1_Macro  F1_Weighted  Accuracy  T_Entren_s  T_Infer_s
+        MLP + Dropout → BatchNorm      MLP  0.381702     0.417727  0.429769   11.287790   0.000577
+                          XGBoost Ensamble  0.380356     0.414657  0.440252    4.150267   0.007388
+                         LightGBM Ensamble  0.367433     0.411291  0.446541    1.082109   0.008772
+                Gradient Boosting Ensamble  0.365495     0.404471  0.438155   41.807509   0.007351
+  MLP + Dropout (post-activación)      MLP  0.346958     0.368352  0.402516    8.243281   0.000396
+        MLP + BatchNorm → Dropout      MLP  0.340191     0.380238  0.404612   12.281523   0.000616
+                    Random Forest Ensamble  0.303422     0.358528  0.421384    1.202214   0.057629
+MLP + BatchNorm (post-activación)      MLP  0.301538     0.339259  0.350105    9.778421   0.000654
+    MLP Base (Sin Regularización)      MLP  0.294219     0.331514  0.348008    7.088628   0.008420
+
+  ✓ comparacion_matrices_confusion.png
+  ✓ comparacion_metricas_todos.png
+  ✓ comparacion_tiempos.png
+  ✓ todas_matrices_confusion.png
+
+========================================================================
+11. POLÍTICA DE UMBRALES OPERATIVOS
+========================================================================
+
+  ZONA DE CONFIANZA   (P_max ≥ 0.85) → Clasificación automática (Verde)
+  ZONA DE INCERTIDUMBRE(0.40 ≤ P < 0.85) → Clasificación asistida (Amarillo)
+  ZONA DE RECHAZO       (P_max < 0.40) → Descarte automático (Rojo)
+
+Estadísticas por zona (sobre test):
+  Confianza (P≥85%): 10 muestras (2.1%) -> Acc: 0.8000, F1: 0.5635
+  Incertidumbre (40%≤P<85%): 300 muestras (62.9%) -> Acc: 0.4867, F1: 0.4127
+  Rechazo (P<40%): 167 muestras (35.0%) -> Acc: 0.3353, F1: 0.3069
+
+  ✓ politica_umbrales.png
+  ✓ politica_umbrales_composicion.png
+
+========================================================================
+12. GUARDANDO MODELOS .PKL PARA STREAMLIT
+========================================================================
+  ✓ Mejor MLP guardado: MLP + Dropout → BatchNorm
+  ✓ XGBoost guardado como: xgboost_model.pkl
+  ✓ LightGBM guardado como: lightgbm_model.pkl
+  ✓ Gradient Boosting guardado como: gradient_boosting_model.pkl
+  ✓ Random Forest guardado como: random_forest_model.pkl
+  ✓ Mejor Ensamble destacado guardado: best_ensemble_model.pkl (XGBoost)
+  ✓ Metadata y políticas guardadas en: model_metadata.json
+
+========================================================================
+13. ANÁLISIS DE TRADE-OFFS: COSTO vs RENDIMIENTO
+========================================================================
+
+  MEJOR MLP — MLP + Dropout → BatchNorm
+    T. entrenamiento : 11.29 s
+    T. inferencia    : 0.0006 s
+    F1-Macro / Acc   : 0.3817 / 0.4298
+
+  MEJOR ENSAMBLE — XGBoost
+    T. entrenamiento : 4.15 s
+    T. inferencia    : 0.0074 s
+    F1-Macro / Acc   : 0.3804 / 0.4403
+
+  DISCUSIÓN:
+  • Latencia crítica (tiempo real)     → El MLP es superior en inferencia.
+  • Calidad de clasificación prioridad → MLP lidera el F1-Macro.
+  • Producción robusta                  → Ensamble + política de umbrales.
+
+  ✓ tradeoff_costo_rendimiento.png
+
+========================================================================
+★ EJECUCIÓN COMPLETADA. Todos los .pkl están en /models ★
+========================================================================
